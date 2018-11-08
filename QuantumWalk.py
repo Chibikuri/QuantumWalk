@@ -4,6 +4,7 @@ from qiskit.qasm import pi
 from qiskit.tools.visualization import plot_histogram, circuit_drawer
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
 
 IBMQ.load_accounts()
 IBMQ.backends()
@@ -19,7 +20,7 @@ class QuantumWalk:
         self.c = ClassicalRegister(cbits)
         self.qc = QuantumCircuit(self.q, self.c)
 
-    def _QFT(self):
+    def _QFT_dg(self):
         q = self.q
         qc = self.qc
         for n in range(1, self.qubits-1):
@@ -55,7 +56,7 @@ class QuantumWalk:
 
 
 
-    def _QFT_dg(self):
+    def _QFT(self):
         q = self.q
         qc = self.qc
         qc.h(q[self.qubits-1])
@@ -139,11 +140,12 @@ class QuantumWalk:
         self._QFT_dg()
         self._S_minus()
         self._QFT()
-
-        qc.measure(q, c)
+        for i in range(1, self.qubits):
+            qc.measure(q[i], c[i-1])
+        # qc.measure(q, c)
         backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[0])
+        backend_sim = IBMQ.get_backend(backends[2])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
@@ -154,11 +156,17 @@ class QuantumWalk:
         values = [l/8192 for l in m.values()]
 
         print(qc.qasm())
-        circuit_drawer(qc).show()
-        plot_histogram(result.get_counts(qc))
+        # circuit_drawer(qc).show()
+        # plot_histogram(result.get_counts(qc))
+        # print(values[1022])
+        # print(values[1023])
+        # print(values[1024])
+        # print(values[1025])
+        # print(values[1026])
+        # print(values[1027])
         plt.xlabel("position")
         plt.ylabel("probability")
-        plt.bar(keys, values, width=1)
+        plt.bar(keys, values, width=0.8)
         plt.show()
 
         print(result.get_counts(qc))
@@ -186,11 +194,51 @@ class QuantumWalk:
 
         print(result.get_counts(qc))
 
+    def check_parity(self):
+        c = self.c
+        q = self.q
+        qc = self.qc
 
 
+        qc.h(q[1])
+        qc.u1(pi/4, q[1])
+        qc.u1(pi/4, q[2])
+        qc.cx(q[1], q[2])
+        qc.u1(-pi/4, q[2])
+        qc.cx(q[1], q[2])
+        qc.h(q[2])
+        qc.measure(q, c)
+        backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
+
+        backend_sim = IBMQ.get_backend(backends[2])
+        # backend_sim = Aer.get_backend(backends[1])
+        result = execute(qc, backend_sim, shots=4096).result()
+        circuit_drawer(qc).show()
+        print(result.get_counts(qc))
+
+        qb = QuantumRegister(self.qubits)
+        cb = ClassicalRegister(self.cbits)
+        qcb = QuantumCircuit(qb, cb)
+
+
+        qcb.h(qb[2])
+        qcb.cu1(pi/2, qb[2], qb[1])
+        qcb.h(qb[1])
+        qcb.measure(qb, cb)
+
+        backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
+
+        backend_sim = IBMQ.get_backend(backends[0])
+        # backend_sim = Aer.get_backend(backends[1])
+        result_b = execute(qcb, backend_sim, shots=4096).result()
+
+        circuit_drawer(qcb).show()
+
+
+        print(result_b.get_counts(qcb))
 
 if __name__ == '__main__':
-    a = QuantumWalk(0, 11, 11, 5)
+    a = QuantumWalk(0, 10, 19, 5)
     # a._QFT_dg()
     # a._QFT_fixing()
     # a._QFT_dg_fixing()
@@ -199,3 +247,4 @@ if __name__ == '__main__':
     a.walk()
     # a.check()
     # a._QFT()
+    # a.check_parity()
