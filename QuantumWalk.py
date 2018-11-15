@@ -1,21 +1,21 @@
 from qiskit import IBMQ, QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import execute, Aer
 from qiskit.qasm import pi
-from qiskit.tools.visualization import plot_histogram, circuit_drawer
+from qiskit.tools.visualization import plot_histogram, circuit_drawer, matplotlib_circuit_drawer
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import math
+import time
+
 IBMQ.load_accounts()
 IBMQ.backends()
 
 class QuantumWalk:
 
-    def __init__(self, initial, qubits, cbits, n):
-        self.initial = initial
+    def __init__(self, qubits, cbits):
         self.qubits = qubits
         self.cbits = cbits
-        self.n = n
         self.q = QuantumRegister(qubits)
         self.c = ClassicalRegister(cbits)
         self.qc = QuantumCircuit(self.q, self.c)
@@ -53,19 +53,22 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
         coef = sum([1/2**i for i in range(2, self.qubits+1)])
+        # print(coef)
         for i in range(1, self.qubits):
             qc.cx(q[i], q[0])
             qc.u1(-pi/2**(self.qubits-i), q[0])
             qc.cx(q[i], q[0])
         qc.u1(coef*pi, q[0])
         for j in range(self.qubits-1):
-            print(j)
+            # print(j)
             qc.u1(-pi/2**(self.qubits-j-1), q[j+1])
 
     def _S_minus(self):
         q = self.q
         qc = self.qc
         coef = sum([1/2**i for i in range(2, self.qubits+1)])
+        # print([1/2**i for i in range(2, self.qubits+1)])
+        # print(coef)
         for i in range(1, self.qubits):
             qc.cx(q[i], q[0])
             qc.u1(-pi/2**(self.qubits-i), q[0])
@@ -79,9 +82,9 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
 
-        # for i in range(math.ceil(self.qubits/2), self.qubits):
-        #     qc.x(q[i])
-        qc.x(q[self.qubits-2])
+        qc.x(q[self.qubits-1])
+        # qc.x(q[1])
+        # qc.x(q[2])
         #initial coin operator
         self._coin_1()
         # step operator
@@ -94,40 +97,43 @@ class QuantumWalk:
         self._QFT_dg()
         self._S_minus()
         self._QFT()
-        for i in range(1, self.qubits):
-            qc.measure(q[i], c[i-1])
-        # qc.measure(q, c)
+        # for i in range(1, self.qubits):
+        #     qc.measure(q[i], c[i-1])
+        qc.measure(q, c)
         backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
 
         backend_sim = IBMQ.get_backend(backends[0])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
+        # matplotlib_circuit_drawer(qc).show()
 
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
         values = [l/8192 for l in m.values()]
 
-        print(qc.qasm())
-        circuit_drawer(qc).show()
-        plot_histogram(result.get_counts(qc))
-        plt.xlabel("position")
-        plt.ylabel("probability")
-        plt.bar(keys, values, width=0.8)
-        plt.show()
+        # print(qc.qasm())
+        # # circuit_drawer(qc).show()
+        # plot_histogram(result.get_counts(qc))
+        # plt.xlabel("position")
+        # plt.ylabel("probability")
+        # plt.bar(keys, values, width=0.8)
+        # plt.show()
+        # return keys, values
+        return m
 
-        print(result.get_counts(qc))
+        # print(result.get_counts(qc))
 
     def _coin_1(self):
-        "In this case, we implemented the case of theta1 = 0, theta2 = pi/2"
 
         c = self.c
         q = self.q
         qc = self.qc
 
         qc.cx(q[1], q[0])
-        qc.u3(1/8, 0, 0, q[0])
+        qc.u3(0.4, 0, 0, q[0])
+        # qc.h(q[0])
         qc.cx(q[1], q[0])
 
     def _coin_2(self):
@@ -136,13 +142,70 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
-        qc.u3(1/8+pi/2, 0, 0, q[0])
+        qc.u3(0.4+pi, 0, 0, q[0])
         # qc.h(q[0])
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
 
-
+    # def check(self):
+    #     c = self.c
+    #     q = self.q
+    #     qc = self.qc
+    #
+    #     qc.h(q[0])
+    #     qc.cx(q[0], q[1])
+    #
+    #     qc.measure(q, c)
+    #     backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
+    #
+    #     backend_sim = IBMQ.get_backend(backends[0])
+    #     # backend_sim = Aer.get_backend(backends[1])
+    #
+    #     result = execute(qc, backend_sim, shots=8192).result()
+    #
+    #
+    #     m = result.get_counts(qc)
+    #     keys = [int(k, 2) for k in m.keys()]
+    #     values = [l/8192 for l in m.values()]
+    #
+    #     print(qc.qasm())
+    #     circuit_drawer(qc).show()
+    #     plot_histogram(result.get_counts(qc))
+    #     plt.xlabel("position")
+    #     plt.ylabel("probability")
+    #     plt.bar(keys, values, width=0.8)
+    #     plt.show()
+    #
+    #     print(result.get_counts(qc))
 
 
 if __name__ == '__main__':
-    a = QuantumWalk(0, 7, 7, 5)
-    a.walk()
+    results = []
+    hel = []
+    n = 4
+    iteration = 50
+    shots = 8192
+
+    for i in range(iteration):
+        start = time.time()
+        print("this is now : %s" % str(i+1))
+        a = QuantumWalk(n, n)
+        results.append(a.walk())
+        print("success")
+        duration = time.time() - start
+        print("Execution Time : %s" % str(duration))
+
+    kln = [l for l in results[0].keys()]
+    kln_int = [int(s, 2) for s in kln]
+
+    for t in kln:
+        vals = 0
+        for s in results:
+            vals += s[t]
+        hel.append(vals/shots)
+
+    plt.xlabel("position")
+    plt.ylabel("probability")
+    plt.bar(kln_int, hel, width=0.8)
+    plt.show()
+
+    print("This is %s qubits quantum walk" % str(n))
