@@ -8,6 +8,7 @@ import sys
 import math
 import time
 
+
 IBMQ.load_accounts()
 IBMQ.backends()
 
@@ -182,7 +183,7 @@ if __name__ == '__main__':
     results = []
     hel = []
     n = 4
-    iteration = 50
+    iteration = 10
     shots = 8192
 
     for i in range(iteration):
