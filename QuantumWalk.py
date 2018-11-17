@@ -3,10 +3,14 @@ from qiskit import execute, Aer
 from qiskit.qasm import pi
 from qiskit.tools.visualization import plot_histogram, circuit_drawer, matplotlib_circuit_drawer
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys
 import math
 import time
+import datetime
+
 
 
 IBMQ.load_accounts()
@@ -148,8 +152,6 @@ class QuantumWalk:
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
 
     # def check(self):
-    #     c = self.c
-    #     q = self.q
     #     qc = self.qc
     #
     #     qc.h(q[0])
@@ -182,8 +184,8 @@ class QuantumWalk:
 if __name__ == '__main__':
     results = []
     hel = []
-    n = 4
-    iteration = 10
+    n = int(sys.argv[1])
+    iteration = 89
     shots = 8192
 
     for i in range(iteration):
@@ -203,10 +205,12 @@ if __name__ == '__main__':
         for s in results:
             vals += s[t]
         hel.append(vals/shots)
-
+    fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
     plt.bar(kln_int, hel, width=0.8)
-    plt.show()
+    #plt.show()
+    tag = datetime.datetime.now()
+    fig.savefig("./data/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour))))
 
     print("This is %s qubits quantum walk" % str(n))
