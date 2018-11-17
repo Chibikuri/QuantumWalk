@@ -1,7 +1,9 @@
 from qiskit import IBMQ, QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import execute, Aer
 from qiskit.qasm import pi
-from qiskit.tools.visualization import plot_histogram, circuit_drawer, matplotlib_circuit_drawer
+from qiskit.tools.visualization import (plot_histogram, 
+                                        circuit_drawer, 
+                                        matplotlib_circuit_drawer)
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
@@ -11,6 +13,7 @@ import time
 
 IBMQ.load_accounts()
 IBMQ.backends()
+
 
 class QuantumWalk:
 
@@ -34,7 +37,6 @@ class QuantumWalk:
                 except:
                     continue
         qc.h(q[self.qubits-1])
-
 
     def _QFT(self):
         q = self.q
@@ -86,29 +88,30 @@ class QuantumWalk:
         qc.x(q[self.qubits-1])
         # qc.x(q[1])
         # qc.x(q[2])
-        #initial coin operator
+        # initial coin operator
         self._coin_1()
         # step operator
         self._QFT_dg()
         self._S_plus()
         self._QFT()
-        #initial coin operator2
+        # initial coin operator2
         self._coin_2()
-        #step operator
+        # step operator
         self._QFT_dg()
         self._S_minus()
         self._QFT()
         # for i in range(1, self.qubits):
         #     qc.measure(q[i], c[i-1])
         qc.measure(q, c)
-        backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
+        backends = ['ibmq_20_tokyo',
+                    'qasm_simulator', 
+                    'ibmqx_hpc_qasm_simulator']
 
         backend_sim = IBMQ.get_backend(backends[0])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
         # matplotlib_circuit_drawer(qc).show()
-
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
@@ -156,7 +159,9 @@ class QuantumWalk:
     #     qc.cx(q[0], q[1])
     #
     #     qc.measure(q, c)
-    #     backends = ['ibmq_20_tokyo', 'qasm_simulator',  'ibmqx_hpc_qasm_simulator']
+    #     backends = ['ibmq_20_tokyo',
+    #                 'qasm_simulator', 
+    #                 'ibmqx_hpc_qasm_simulator']
     #
     #     backend_sim = IBMQ.get_backend(backends[0])
     #     # backend_sim = Aer.get_backend(backends[1])
