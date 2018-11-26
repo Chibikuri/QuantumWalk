@@ -218,7 +218,7 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
-    plt.xlim([-2**(n//2), 2**(n//2)])
+    plt.xlim([-2**(n//2), 2**(n//2)+1])
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
