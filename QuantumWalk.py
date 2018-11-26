@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from qiskit import IBMQ, QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import execute, Aer
 from qiskit.qasm import pi
@@ -5,8 +7,6 @@ from qiskit.tools.visualization import (plot_histogram,
                                         circuit_drawer, 
                                         matplotlib_circuit_drawer)
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys
 import math
@@ -89,7 +89,7 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
 
-        qc.x(q[self.qubits-1])
+        qc.x(q[0])
         # qc.x(q[1])
         # qc.x(q[2])
         # initial coin operator
@@ -106,12 +106,15 @@ class QuantumWalk:
         self._QFT()
         # for i in range(1, self.qubits):
         #     qc.measure(q[i], c[i-1])
-        qc.measure(q, c)
+        for i in range(self.qubits):
+            qc.barrier(q[i])
+        for j in range(1, self.qubits):
+            qc.measure(q[j], c[j-1])
         backends = ['ibmq_20_tokyo',
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[0])
+        backend_sim = IBMQ.get_backend(backends[2])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
@@ -140,7 +143,7 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[1], q[0])
-        qc.u3(0.4, 0, 0, q[0])
+        qc.u3(1/8, 0, 0, q[0])
         # qc.h(q[0])
         qc.cx(q[1], q[0])
 
@@ -150,8 +153,8 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
-        qc.u3(0.4+pi, 0, 0, q[0])
-        # qc.h(q[0])
+        qc.u3(1/8+pi/2, 0, 0, q[0])
+        # qc.hq[0])
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
 
     # def check(self):
@@ -184,38 +187,41 @@ class QuantumWalk:
     #     plt.show()
     #
     #     print(result.get_counts(qc))
-
-
+    
 if __name__ == '__main__':
     results = []
     hel = []
     n = int(sys.argv[1])
-    iteration = 89
+    iteration = 1
     shots = 8192
 
     for i in range(iteration):
         start = time.time()
         print("this is now : %s" % str(i+1))
-        a = QuantumWalk(n, n)
+        a = QuantumWalk(n, n-1)
         results.append(a.walk())
         print("success")
         duration = time.time() - start
         print("Execution Time : %s" % str(duration))
 
     kln = [l for l in results[0].keys()]
-    kln_int = [int(s, 2) for s in kln]
+    kln_int = [int(s, 2)-(2**(n//2))+1 for s in kln]
 
     for t in kln:
         vals = 0
         for s in results:
-            vals += s[t]
+            try:
+                vals += s[t]
+            except:
+                continue
         hel.append(vals/shots)
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
+    plt.xlim([-2**(n//2), 2**(n//2)])
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./data/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour))))
-
+    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    # fig.show()
     print("This is %s qubits quantum walk" % str(n))
