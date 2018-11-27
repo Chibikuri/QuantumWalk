@@ -114,18 +114,18 @@ class QuantumWalk:
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[0])
+        backend_sim = IBMQ.get_backend(backends[2])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
-        # matplotlib_circuit_drawer(qc).show()
+        matplotlib_circuit_drawer(qc).show()
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
         values = [l/8192 for l in m.values()]
 
         # print(qc.qasm())
-        # # circuit_drawer(qc).show()
+        # circuit_drawer(qc).show()
         # plot_histogram(result.get_counts(qc))
         # plt.xlabel("position")
         # plt.ylabel("probability")
@@ -157,36 +157,6 @@ class QuantumWalk:
         # qc.hq[0])
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
 
-    # def check(self):
-    #     qc = self.qc
-    #
-    #     qc.h(q[0])
-    #     qc.cx(q[0], q[1])
-    #
-    #     qc.measure(q, c)
-    #     backends = ['ibmq_20_tokyo',
-    #                 'qasm_simulator', 
-    #                 'ibmqx_hpc_qasm_simulator']
-    #
-    #     backend_sim = IBMQ.get_backend(backends[0])
-    #     # backend_sim = Aer.get_backend(backends[1])
-    #
-    #     result = execute(qc, backend_sim, shots=8192).result()
-    #
-    #
-    #     m = result.get_counts(qc)
-    #     keys = [int(k, 2) for k in m.keys()]
-    #     values = [l/8192 for l in m.values()]
-    #
-    #     print(qc.qasm())
-    #     circuit_drawer(qc).show()
-    #     plot_histogram(result.get_counts(qc))
-    #     plt.xlabel("position")
-    #     plt.ylabel("probability")
-    #     plt.bar(keys, values, width=0.8)
-    #     plt.show()
-    #
-    #     print(result.get_counts(qc))
     
 if __name__ == '__main__':
     results = []
@@ -204,17 +174,20 @@ if __name__ == '__main__':
         duration = time.time() - start
         print("Execution Time : %s" % str(duration))
 
-    kln = [l for l in results[0].keys()]
+    kln = [format(l, '0%sb' % (str(n))) for l in range(2**(n-1))]
     # kln = [bin(l).split("b")[1] for l in range(2**(n-1))]
-    kln_int = [int(s, 2)-(2**(n-2)) for s in kln]
-
+    kln_int = [int(s, 2)-(2**(n-1)+1) for s in kln]
+    print(kln)
+    print(results)
+    print(kln_int)
     for t in kln:
         vals = 0
         for s in results:
-            try:
+            #try:
                 vals += s[t]
-            except:
-                continue
+            #except:
+             #   print("error")
+            #    continue
         hel.append(vals/shots)
     fig = plt.figure()
     plt.xlabel("position")
@@ -223,6 +196,6 @@ if __name__ == '__main__':
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./real/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     # fig.show()
     print("This is %s qubits quantum walk" % str(n))
