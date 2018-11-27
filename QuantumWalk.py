@@ -114,7 +114,7 @@ class QuantumWalk:
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[0])
+        backend_sim = IBMQ.get_backend(backends[2])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
-    plt.xlim([-2**(n), 2**(n)+1])
+    plt.xlim([-2**(n-1), 2**(n-1)+1])
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
