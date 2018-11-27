@@ -89,7 +89,7 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
 
-        qc.x(q[0])
+        qc.x(q[self.qubits - 1])
         # qc.x(q[1])
         # qc.x(q[2])
         # initial coin operator
@@ -143,7 +143,7 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[1], q[0])
-        qc.u3(1/8, 0, 0, q[0])
+        qc.u3(1/8+pi/4, 0, 0, q[0])
         # qc.h(q[0])
         qc.cx(q[1], q[0])
 
@@ -153,7 +153,7 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
-        qc.u3(1/8+pi/2, 0, 0, q[0])
+        qc.u3(1/8 + pi/2, 0, 0, q[0])
         # qc.hq[0])
         qc.cx(q[math.ceil(self.qubits/2)], q[0])
 
@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     kln = [l for l in results[0].keys()]
     # kln = [bin(l).split("b")[1] for l in range(2**(n-1))]
-    kln_int = [int(s, 2)-(2**(n-2))+1 for s in kln]
+    kln_int = [int(s, 2)-(2**(n-2)) for s in kln]
 
     for t in kln:
         vals = 0
