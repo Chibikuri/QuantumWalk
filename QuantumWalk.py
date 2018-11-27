@@ -174,20 +174,20 @@ if __name__ == '__main__':
         duration = time.time() - start
         print("Execution Time : %s" % str(duration))
 
-    kln = [format(l, '0%sb' % (str(n))) for l in range(2**(n-1))]
+    kln = [format(l, '0%sb' % (str(n-1))) for l in range(2**(n-1))]
     # kln = [bin(l).split("b")[1] for l in range(2**(n-1))]
-    kln_int = [int(s, 2)-(2**(n-1)+1) for s in kln]
+    kln_int = [int(s, 2)-(2**(n-3)+1) for s in kln]
     print(kln)
     print(results)
     print(kln_int)
     for t in kln:
         vals = 0
         for s in results:
-            #try:
+            try:
                 vals += s[t]
-            #except:
-             #   print("error")
-            #    continue
+            except:
+                print("keyerror")
+                continue
         hel.append(vals/shots)
     fig = plt.figure()
     plt.xlabel("position")
