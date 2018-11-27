@@ -205,6 +205,7 @@ if __name__ == '__main__':
         print("Execution Time : %s" % str(duration))
 
     kln = [l for l in results[0].keys()]
+    # kln = [bin(l).split("b")[1] for l in range(2**(n-1))]
     kln_int = [int(s, 2)-(2**(n//2))+1 for s in kln]
 
     for t in kln:
