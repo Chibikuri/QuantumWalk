@@ -1,13 +1,3 @@
 python QuantumWalk.py 3
-python QuantumWalk.py 4
-python QuantumWalk.py 5
-python QuantumWalk.py 6
-python QuantumWalk.py 7
-python QuantumWalk.py 8
 python QuantumWalk.py 9
-python QuantumWalk.py 10
 python QuantumWalk.py 11
-python QuantumWalk.py 12
-python QuantumWalk.py 13
-python QuantumWalk.py 14
-python QuantumWalk.py 15
