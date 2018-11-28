@@ -51,8 +51,9 @@ class QuantumWalk:
             for u in range(self.qubits, 0, -1):
                 try:
                     qc.cu1(pi/(2**(u)), q[m+u], q[m])
-                    # print(pi/(2**(u)), u+m, m)
+                    print(pi/(2**(u)), m+u, m)
                 except:
+                    print("error")
                     continue
             qc.h(q[m])
 
@@ -124,7 +125,7 @@ class QuantumWalk:
         keys = [int(k, 2) for k in m.keys()]
         values = [l/8192 for l in m.values()]
 
-        # print(qc.qasm())
+        print(qc.qasm())
         # circuit_drawer(qc).show()
         # plot_histogram(result.get_counts(qc))
         # plt.xlabel("position")
@@ -186,7 +187,7 @@ if __name__ == '__main__':
             try:
                 vals += s[t]
             except:
-                print("keyerror")
+                print("keyerror", t)
                 continue
         hel.append(vals/shots)
     fig = plt.figure()
