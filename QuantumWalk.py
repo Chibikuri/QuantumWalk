@@ -114,7 +114,7 @@ class QuantumWalk:
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[2])
+        backend_sim = IBMQ.get_backend(backends[0])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
@@ -188,7 +188,7 @@ if __name__ == '__main__':
             except:
                 print("keyerror")
                 continue
-        hel.append(vals/shots)
+        hel.append(vals/shots*iteration)
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
@@ -196,6 +196,6 @@ if __name__ == '__main__':
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./real/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     # fig.show()
     print("This is %s qubits quantum walk" % str(n))
