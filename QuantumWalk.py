@@ -51,9 +51,9 @@ class QuantumWalk:
             for u in range(self.qubits, 0, -1):
                 try:
                     qc.cu1(pi/(2**(u)), q[m+u], q[m])
-                    print(pi/(2**(u)), m+u, m)
+                    #print(pi/(2**(u)), m+u, m)
                 except:
-                    print("error")
+                    #print("error")
                     continue
             qc.h(q[m])
 
@@ -119,13 +119,13 @@ class QuantumWalk:
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
-        matplotlib_circuit_drawer(qc).show()
+        # matplotlib_circuit_drawer(qc).show()
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
         values = [l/8192 for l in m.values()]
 
-        print(qc.qasm())
+        # print(qc.qasm())
         # circuit_drawer(qc).show()
         # plot_histogram(result.get_counts(qc))
         # plt.xlabel("position")
@@ -133,7 +133,7 @@ class QuantumWalk:
         # plt.bar(keys, values, width=0.8)
         # plt.show()
         # return keys, values
-        return m
+        return m 
 
         # print(result.get_counts(qc))
 
@@ -174,22 +174,26 @@ if __name__ == '__main__':
         print("success")
         duration = time.time() - start
         print("Execution Time : %s" % str(duration))
+    
+        # plot_histogram(a)
 
     kln = [format(l, '0%sb' % (str(n-1))) for l in range(2**(n-1))]
     # kln = [bin(l).split("b")[1] for l in range(2**(n-1))]
-    kln_int = [int(s, 2)-(2**(n-3)+1) for s in kln]
-    print(kln)
-    print(results)
+    kln_int = [int(s, 2)-(2**(n-2)) for s in kln]
+    # print(kln)
+    # print(results)
     print(kln_int)
     for t in kln:
         vals = 0
         for s in results:
             try:
                 vals += s[t]
+                # print(vals)
             except:
-                print("keyerror", t)
+                #print("keyerror", t)
                 continue
-        hel.append(vals/shots*iteration)
+        # print(vals/shots*iteration)
+        hel.append(vals/(shots*iteration))
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
@@ -197,6 +201,6 @@ if __name__ == '__main__':
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./real/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     # fig.show()
     print("This is %s qubits quantum walk" % str(n))
