@@ -144,7 +144,7 @@ class QuantumWalk:
         qc = self.qc
 
         qc.cx(q[1], q[0])
-        qc.u3(1/8+pi/2, 0, 0, q[0])
+        qc.u3(1/8-pi/2, 0, 0, q[0])
         # qc.h(q[0])
         qc.cx(q[1], q[0])
 
