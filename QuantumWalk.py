@@ -151,11 +151,11 @@ class QuantumWalk:
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[2])
+        backend_sim = IBMQ.get_backend(backends[0])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
-        #  matplotlib_circuit_drawer(qc).show()
+        matplotlib_circuit_drawer(qc).show()
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
