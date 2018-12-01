@@ -155,7 +155,7 @@ class QuantumWalk:
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
-        matplotlib_circuit_drawer(qc).show()
+        #  matplotlib_circuit_drawer(qc).show()
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
@@ -170,16 +170,9 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
 
-<<<<<<< HEAD
         # qc.cx(q[1], q[0])
         qc.u3(0.4, 0, 0, q[0])
         # qc.cx(q[1], q[0])
-=======
-        qc.cx(q[1], q[0])
-        qc.u3(1/8-pi/2, 0, 0, q[0])
-        # qc.h(q[0])
-        qc.cx(q[1], q[0])
->>>>>>> origin/master
 
     def _coin_2(self):
         c = self.c
@@ -218,7 +211,7 @@ if __name__ == '__main__':
     kln_int = [int(s, 2) for s in kln]
     # print(kln)
     # print(results)
-    print(kln_int)
+    # print(kln_int)
     for t in kln:
         vals = 0
         for s in results:
@@ -237,6 +230,6 @@ if __name__ == '__main__':
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./real/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     # fig.show()
     print("This is %s qubits quantum walk" % str(n))
