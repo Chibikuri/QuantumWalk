@@ -14,7 +14,6 @@ import time
 import datetime
 
 
-
 IBMQ.load_accounts()
 IBMQ.backends()
 
@@ -28,37 +27,36 @@ class QuantumWalk:
         self.c = ClassicalRegister(cbits)
         self.qc = QuantumCircuit(self.q, self.c)
 
-    def _QFT(self):
-        q = self.q
-        qc = self.qc
-        qc.h(q[self.qubits-1])
-        for n in range(1, self.qubits-1):
-            # print(n)
-            for t in range(1, self.qubits-n):
-                try:
-                    qc.cu1(-pi/(2**(t)), q[t], q[t+n])
-                    # print(pi/(2**(t)), n, t+n)
-                except:
-                    continue
-            qc.h(q[n])
-        
-
     def _QFT_dg(self):
         q = self.q
         qc = self.qc
+        for n in range(1, self.qubits):
+            # print(n)
+            qc.h(q[n])
+            for t in range(1, self.qubits-n):
+                try:
+                    qc.cu1(pi/(2**(t)), q[n], q[n+t])
+                    # print(pi/(2**(t)), n, t+n)
+                except:
+                    continue
+            
+            # qc.h(q[self.qubits-1])
+            
+    def _QFT(self):
+        q = self.q
+        qc = self.qc
         
-        for m in range(self.qubits-2, 0, -1):
+        for m in range(self.qubits-1, 0, -1):
             # print(m)
-            qc.h(q[m])
+            
             for u in range(self.qubits, 0, -1):
                 try:
-                    qc.cu1(pi/(2**(u)), q[m+u], q[m])
+                    qc.cu1(-pi/(2**(u)), q[m+u], q[m])
                     #print(pi/(2**(u)), m+u, m)
                 except:
                     #print("error")
                     continue
-        qc.h(q[self.qubits-1])
-            
+            qc.h(q[m])
 
     # def check_qft_dg(self):
     #     q = self.q
@@ -116,26 +114,27 @@ class QuantumWalk:
         qc.u1(-coef*pi, q[0])
         for j in range(self.qubits-1):
             qc.u1(-pi/2**(self.qubits-j-1), q[j+1])
-        print([1/(2**i) for i in range(2, self.qubits+1)])
 
-    def walk(self):
+    def walk(self, step):
         c = self.c
         q = self.q
         qc = self.qc
 
-        qc.x(q[self.qubits - 1])
-        # initial coin operator
-        self._coin_1()
-        # self.check_qft_dg()
-        self._QFT_dg()
-        self._S_plus()
-        self._QFT()
-
-        # initial coin operator2
-        self._coin_2()
-        self._QFT_dg()
-        self._S_minus()
-        self._QFT()
+        # qc.x(q[1])
+        qc.x(q[self.qubits-1])
+        # initial coin perator
+        for i in range(7):
+            self._coin_1(-0.4, -0.4)
+            # self.check_qft_dg()
+            self._QFT_dg()
+            self._S_plus()
+            self._QFT()
+        for j in range(7):
+            # initial coin operator2
+            self._coin_2(-0.4-pi, 0.4+pi)
+            self._QFT_dg()
+            self._S_minus()
+            self._QFT()
 
         for i in range(self.qubits):
             qc.barrier(q[i])
@@ -147,40 +146,43 @@ class QuantumWalk:
         # qc.measure(q[1], c[1])
         # qc.measure(q[2], c[0])
         # qc.measure(q, c)
+
         backends = ['ibmq_20_tokyo',
                     'qasm_simulator', 
                     'ibmqx_hpc_qasm_simulator']
 
-        backend_sim = IBMQ.get_backend(backends[0])
+        backend_sim = IBMQ.get_backend(backends[2])
         # backend_sim = Aer.get_backend(backends[1])
 
         result = execute(qc, backend_sim, shots=8192).result()
-        matplotlib_circuit_drawer(qc).show()
+        # matplotlib_circuit_drawer(qc).show()
 
         m = result.get_counts(qc)
         keys = [int(k, 2) for k in m.keys()]
         values = [l/8192 for l in m.values()]
+        # plot_histogram(result.get_counts(qc))
 
         # print(qc.qasm())
-        return m 
+        return m
 
-    def _coin_1(self):
-
+    def _coin_1(self, theta1p, theta1m):
         c = self.c
         q = self.q
         qc = self.qc
 
-        # qc.cx(q[1], q[0])
-        qc.u3(0.4, 0, 0, q[0])
-        # qc.cx(q[1], q[0])
-
-    def _coin_2(self):
-        c = self.c
-        q = self.q
-        qc = self.qc
-
+        qc.u3(-(theta1p+theta1m)/2, 0, 0, q[0])
         qc.cx(q[1], q[0])
-        qc.u3(0.4+pi, 0, 0, q[0])
+        qc.u3(-(theta1p-theta1m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+
+    def _coin_2(self, theta2p, theta2m):
+        c = self.c
+        q = self.q
+        qc = self.qc
+
+        qc.u3(-(theta2p+theta2m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+        qc.u3(-(theta2p-theta2m)/2, 0, 0, q[0])
         qc.cx(q[1], q[0])
 
     
@@ -195,15 +197,13 @@ if __name__ == '__main__':
         start = time.time()
         print("this is now : %s" % str(i+1))
         a = QuantumWalk(n, n)
-        m = a.walk()
+        m = a.walk(i)
         results.append(m)
         print(m)
         print("success")
         duration = time.time() - start
         print("Execution Time : %s" % str(duration))
 
-    
-        # plot_histogram(a)
     # print(results)
 
     kln = [format(l, '0%sb' % (str(n))) for l in range(2**(n))]
@@ -226,10 +226,10 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
-    plt.xlim([-1, 2**(n)+1])
+    plt.xlim([-2**(n-1), 2**(n-1)+1])
     plt.bar(kln_int, hel, width=0.8)
     #plt.show()
     tag = datetime.datetime.now()
-    fig.savefig("./real/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     # fig.show()
     print("This is %s qubits quantum walk" % str(n))
