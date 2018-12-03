@@ -1,3 +1,5 @@
+#! usr/bin/env python3
+# -*- coding: utf-8 -*-
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +11,7 @@ from qiskit import IBMQ, QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import execute, Aer
 from qiskit.qasm import pi
 from qiskit.tools.visualization import plot_histogram, circuit_drawer, matplotlib_circuit_drawer
-matplotlib.use('Agg')
+# matplotlib.use('Agg')
 IBMQ.load_accounts()
 IBMQ.backends()
 
@@ -79,13 +81,13 @@ class QuantumWalk:
         # qc.x(q[1])
         qc.x(q[self.qubits-1])
         # initial coin perator
-        for i in range(1):
+        for i in range(step):
             self._coin_1(-0.4, -0.4, qc)
             # self.check_qft_dg()
             self._QFT_dg(qc)
             self._S_plus(qc)
             self._QFT(qc)
-        for j in range(1):
+        for j in range(step):
             # initial coin operator2
             self._coin_2(-0.4-pi, 0.4+pi, qc)
             self._QFT_dg(qc)
@@ -138,19 +140,19 @@ if __name__ == '__main__':
     results = []
     hel = []
     n = int(sys.argv[1])
-    iteration = int(sys.argv[2])
+    steps = int(sys.argv[2])
     shots = 8192
 
-    for i in range(iteration):
-        start = time.time()
-        print("this is now : %s" % str(i+1))
-        a = QuantumWalk(n, n)
-        m = a.walk(i)
-        results.append(m)
-        print(m)
-        print("success")
-        duration = time.time() - start
-        print("Execution Time : %s" % str(duration))
+    # for i in range(steps):
+    start = time.time()
+    print("this is now : %s" % str(steps), "steps")
+    a = QuantumWalk(n, n)
+    m = a.walk(steps)
+    results.append(m)
+    print(m)
+    print("success")
+    duration = time.time() - start
+    print("Execution Time : %s" % str(duration))
 
     kln = [format(l, '0%sb' % (str(n))) for l in range(2**(n))]
     kln_int = [int(s, 2) for s in kln]
@@ -161,12 +163,13 @@ if __name__ == '__main__':
                 vals += s[t]
             except:
                 continue
-        hel.append(vals/(shots*iteration))
+        hel.append(vals/shots)
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
     plt.xlim([-2**(n-1), 2**(n-1)+1])
+    plt.ylim([0, 1.0])
     plt.bar(kln_int, hel, width=0.8)
     tag = datetime.datetime.now()
-    fig.savefig("./sim/%squbits/real_%stimes%s" % (str(n), str(iteration), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
+    fig.savefig("./sim/%squbits/%ssteps%s" % (str(n), str(steps), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
     print("This is %s qubits quantum walk" % str(n))
