@@ -24,6 +24,24 @@ class QuantumWalk:
         self.c = ClassicalRegister(cbits)
         self.qc = QuantumCircuit(self.q, self.c)
 
+    def _coin_1(self, theta1p, theta1m, circuit):
+        q = self.q
+        qc = circuit
+
+        qc.u3(-(theta1p+theta1m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+        qc.u3(-(theta1p-theta1m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+
+    def _coin_2(self, theta2p, theta2m, circuit):
+        q = self.q
+        qc = circuit
+
+        qc.u3(-(theta2p+theta2m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+        qc.u3(-(theta2p-theta2m)/2, 0, 0, q[0])
+        qc.cx(q[1], q[0])
+
     def _QFT_dg(self, circuit):
         q = self.q
         qc = circuit
@@ -81,14 +99,14 @@ class QuantumWalk:
         qc.x(q[self.qubits-1])
         # initial coin perator
         for i in range(step):
-            self._coin_1(-0.4, -0.4, qc)
+            self._coin_1(-1/8, -1/8, qc)
             # self.check_qft_dg()
             self._QFT_dg(qc)
             self._S_plus(qc)
             self._QFT(qc)
         for j in range(step):
             # initial coin operator2
-            self._coin_2(-0.4-pi, 0.4+pi, qc)
+            self._coin_2(-1/8-pi/2, 1/8+pi/2, qc)
             self._QFT_dg(qc)
             self._S_minus(qc)
             self._QFT(qc)
@@ -115,25 +133,6 @@ class QuantumWalk:
         # plot_histogram(result.get_counts(qc))
         # print(qc.qasm())
         return m
-
-    def _coin_1(self, theta1p, theta1m, circuit):
-        q = self.q
-        qc = circuit
-
-        qc.u3(-(theta1p+theta1m)/2, 0, 0, q[0])
-        qc.cx(q[1], q[0])
-        qc.u3(-(theta1p-theta1m)/2, 0, 0, q[0])
-        qc.cx(q[1], q[0])
-
-    def _coin_2(self, theta2p, theta2m, circuit):
-        q = self.q
-        qc = circuit
-
-        qc.u3(-(theta2p+theta2m)/2, 0, 0, q[0])
-        qc.cx(q[1], q[0])
-        qc.u3(-(theta2p-theta2m)/2, 0, 0, q[0])
-        qc.cx(q[1], q[0])
-
 
 if __name__ == '__main__':
     results = []
@@ -168,6 +167,7 @@ if __name__ == '__main__':
     plt.ylabel("probability")
     plt.xlim([-2**(n-1), 2**(n-1)+1])
     plt.ylim([0, 1.0])
+    plt.title("%squbits:Step = %s" % (n, steps))
     plt.bar(kln_int, hel, width=0.8)
     tag = datetime.datetime.now()
     fig.savefig("./sim/%squbits/%ssteps%s" % (str(n), str(steps), (str(tag.month)+str(tag.day)+str(tag.hour)+str(tag.minute)+str(tag.second))))
