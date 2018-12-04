@@ -165,7 +165,7 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.xlabel("position")
     plt.ylabel("probability")
-    plt.xlim([-2**(n-1), 2**(n-1)+1])
+    plt.xlim([-1, 2**(n-1)+1])
     plt.ylim([0, 1.0])
     plt.title("%squbits:Step = %s" % (n, steps))
     plt.bar(kln_int, hel, width=0.8)
