@@ -51,7 +51,6 @@ class QuantumWalk:
             for t in range(1, self.qubits-n):
                 try:
                     qc.cu1(pi/(2**(t)), q[n], q[n+t])
-                    # print(pi/(2**(t)), n, t+n)
                 except:
                     continue
 
@@ -95,7 +94,6 @@ class QuantumWalk:
         q = self.q
         qc = self.qc
 
-        # qc.x(q[1])
         qc.x(q[self.qubits-1])
         # initial coin perator
         for i in range(step):
